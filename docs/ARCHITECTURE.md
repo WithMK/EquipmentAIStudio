@@ -145,3 +145,11 @@ Phase 1 프론트엔드는 React + TypeScript + Vite, React Router, TanStack Que
 ## Phase 1 구현 경계 (2026-11-05)
 
 실제 코드는 `web/src/` 아래 app / features / shared / adapters로 분리됩니다. [확장 가이드](FRONTEND_FOUNDATION.md)가 구체적 의존성과 모듈 추가 절차를 정의합니다. 위 업무 기능 명세 전체의 구현 완료를 의미하지 않습니다.
+
+## Phase 5·6 구현 경계 (2026-11-05)
+
+`datasets`, `models`, `ai-tools`, `hub-management` Feature Module이 composition root에 등록됩니다. Shell은 모듈의 내부 구현을 참조하지 않습니다. `shared/domain/management.ts`에 버전 스냅샷 및 Hub 조회 모델을 두고 `CatalogRepository`와 `HubRepository`를 서비스로 주입합니다.
+
+Dataset 후보는 페이지/필터 계약으로 조회합니다. Mock만 메모리 fixture 전체를 탐색하고 실제 adapter에서는 서버 조회로 교체해야 합니다. Dataset은 생성 당시 이미지 ID·원본 판정·Review 레이블과 이력 출처를 복사하여 불변으로 보존합니다. 확정 Dataset 버전만 모델과 연결할 수 있습니다. Registry 저장은 별도 IndexedDB readwrite transaction에서 중복 검사와 기록을 함께 수행합니다. 기존 Review DB와 수집 엔진은 변경하지 않습니다.
+
+현재 학습 파일 경로, 모델 상태, 성능 수치는 사용자가 입력한 메타데이터입니다. 실제 학습/배포/경로 검증은 없습니다. Hub의 세 시나리오는 고정 관측 시각의 조회 예제이며 자동 새로고침이 실제 수집 성공이나 새 Heartbeat를 만들지 않습니다. 실제 API·인증·Export·SAIGE 실행은 후속 범위입니다.

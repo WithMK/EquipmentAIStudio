@@ -19,6 +19,7 @@ test('candidate filters, cross-page selection and unsaved route protection',asyn
 });
 test('Hub mixed, recovery and offline scenarios; navigation and deep reload',async({page})=>{
  await page.goto('hub');await expect(page.getByText('온라인 (Mock)',{exact:true})).toBeVisible();await expect(page.getByText('9 / 27',{exact:true})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
  await page.getByLabel('수집 상태',{exact:true}).selectOption('error');await expect(page.locator('tbody tr')).toHaveCount(1);await page.getByRole('button',{name:'EQ03 / Side',exact:true}).click();await expect(page.getByRole('heading',{name:'EQ03 / Side 상세'})).toBeVisible();
  await page.getByLabel('시연 시나리오',{exact:true}).selectOption('healthy');await expect(page.getByText('조건에 맞는 PC가 없습니다.')).toBeVisible();await page.getByLabel('수집 상태',{exact:true}).selectOption('');await expect(page.locator('tbody tr')).toHaveCount(27);
  await page.getByLabel('시연 시나리오',{exact:true}).selectOption('offline');await expect(page.getByText('연결 불가 (Mock)',{exact:true})).toBeVisible();await expect(page.locator('tbody .hub-state.unknown')).toHaveCount(27);await page.reload();await expect(page.getByRole('heading',{name:'DatasetHub',exact:true})).toBeVisible();
