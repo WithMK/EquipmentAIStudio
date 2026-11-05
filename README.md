@@ -1,6 +1,6 @@
 # Equipment AI Studio
 
-> Frontend Prototype v0.1 · Phase 3 이미지 Viewer 구현 · 후속 업무 기능은 미구현
+> Frontend Prototype v0.1 · Phase 4 Image Review 구현 · 후속 업무 기능은 미구현
 
 **여러 설비의 검사 결과·이미지를 통합 조회·검토·분류하고, AI 데이터셋과 모델을 관리하는 개발자 중심 Web Workspace.**
 
@@ -9,10 +9,10 @@
 
 ## 실행 — Windows
 
-Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase3-viewer`입니다.
+Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase4-review`입니다.
 
 ```powershell
-git clone -b feat/studio-phase3-viewer https://github.com/WithMK/EquipmentAIStudio.git
+git clone -b feat/studio-phase4-review https://github.com/WithMK/EquipmentAIStudio.git
 cd EquipmentAIStudio/web
 npm ci
 npm run dev
@@ -46,7 +46,7 @@ Remove-Item Env:VITE_BASE_PATH
 - 모듈 등록 기반 메뉴·지연 로딩·하위 라우트, Inspection Explorer 기반 화면과 Workspace 환경 화면
 - 서비스 주입, Mock Repository, 공통 HTTP transport, 인증 교체 인터페이스
 - Equipment/LOT/Product/Inspection/Image/Review/Dataset/Model/Hub의 **초안 타입** 및 재현 가능한 설비 9대 fixture
-- 조회·필터·정렬·LOT 단위 페이징과 제품 상세 진입은 구현했습니다. Viewer는 구현했습니다. Review 저장·Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
+- 조회·필터·정렬·LOT 단위 페이징과 제품 상세 진입은 구현했습니다. Viewer는 구현했습니다. 이미지별 Review 저장·이력은 구현했습니다. Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
 
 [Phase 1 구조와 확장 가이드](docs/FRONTEND_FOUNDATION.md) · [검증 기록](docs/PHASE1_VALIDATION.md)
 
@@ -110,3 +110,13 @@ Mock adapter만 전체 fixture를 메모리에 읽고 화면에는 현재 페이
 `web/public/samples/`의 SVG 4개는 확대·NG 위치 확인용 결정적 합성 패턴입니다. 실제 검사 이미지나 실제 온도값이 아닙니다. 촬영 위치별로 일부 패턴을 재사용합니다. 실제 API adapter는 브라우저 호환 썸네일/원본 URL과 크기·NG 좌표를 제공하면 됩니다. TIFF 직접 디코딩/타일 스트리밍, 다중 이미지 동시 비교, 개발자 판정 저장은 미구현입니다.
 
 화면은 반복 브랜드·예정 메뉴·단계 배지를 줄이고 중성 회색과 판정 색상 중심으로 정리했습니다.
+
+## Phase 4 검토 저장
+
+Viewer 오른쪽 개발자 검토에서 OK/NG, 불량 유형(복수), 메모를 저장합니다. NG는 불량 유형이 필수이며 OK 변경 시 유형을 비웁니다. 설비 원본 판정은 바꾸지 않습니다. 검토 시각·검토자·이전 버전 연결을 이력으로 누적하고 최신 검토를 다시 불러옵니다. 누락된 이미지는 저장할 수 없습니다.
+
+저장은 **해당 브라우저/프로필/웹 origin의 IndexedDB**를 사용합니다. 새로고침·재접속 후 유지되지만 다른 PC/브라우저와 공유되지 않으며 사이트 데이터 삭제 시 사라집니다. `/`와 `/studio/`가 같은 origin이면 같은 시연 저장소를 사용합니다. 실제 서버/인증/백업은 미구현이며 검토자는 Demo engineer입니다. 운영 데이터 저장 용도로 사용하지 마세요.
+
+다른 탭에서 변경한 오래된 검토의 저장은 충돌 오류로 거부합니다. 다시 불러오기 후 검토하세요. 이미지·유형·검사 실행 변경과 화면 이동에는 미저장 확인이 있으며 탭 종료/새로고침에는 브라우저 기본 확인을 요청합니다. 브라우저가 종료 확인을 표시하지 않을 수 있으므로 저장 버튼 완료 메시지를 확인하세요.
+
+`ReviewRepository`를 HTTP adapter로 교체할 수 있습니다. image-review 패널은 공통 slot 계약으로 주입되어 Viewer에서 다른 feature를 직접 import하지 않습니다. 실제 백엔드에서는 인증된 검토자·권한·revision 충돌 검증이 필요합니다.
