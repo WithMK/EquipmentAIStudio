@@ -1,66 +1,81 @@
 # Equipment AI Studio — Development Roadmap
 
-> v0.1 | 2026-11-03 | 단계·검수 기준 초안
+> v0.2 · 2026-11-05 · 설계 및 단계별 개발·검수 방향
 
 ## 전제
 
-- DatasetHub가 로그/이미지 수집을 담당하고, Data Processing·Matching을 통해 조회 가능한 메타데이터를 생성한다.
-- Studio는 DatasetHub의 매칭된 결과만 활용하며 파서/매처를 다시 구현하지 않는다.
-- SAIGE는 한 사용자가 학습 PC에서 별도 프로그램으로 실행한다.
-- EquipmentAIPlatform의 공통 문서가 최상위 시스템 경계를 정의한다.
+- DatasetHub Desktop은 현장 PC/공유폴더 연결·수집 모니터링·설정·수동 복구에 **필수**; 기존 SMB Pull 수집 방식 변경 금지
+- Studio는 개발자용 검사 이력·이미지 분석/분류·AI Model 관리 및 Hub의 원격 보조 관리
+- 실제 설비 로그/이미지는 아직 없으므로 Mock Data 계약으로 선행 개발하고 실제 Parser/Adapter만 교체할 수 있도록 구성
+- 실시간 설비 가동률·알람 관제는 별도 시스템 소유
 
-## Phase 0 — 설계 계약 및 실행 틀
+## Phase 0 — Frontend Foundation / Mock Contract
 
-- 웹 프론트엔드 스택, 배포 모델(독립 프로세스), 환경 설정, `/studio/` Base Path 지원 방향 결정
-- EquipmentAIPlatform과의 인증·메뉴·라우팅 연계 인터페이스 합의
-- DatasetHub와 `Equipment/LOT/Product/Inspection/Image` 식별자 및 읽기 API 계약 합의
-- 실제 외부 API 미구현 시 Mock 데이터 어댑터로 UI 개발하되 Mock 여부를 명확히 표시
-- **완료 기준**: 독립 웹 시작, 기본 라우팅/구성 검증, 상위 웹으로 경로 기반 라우팅 PoC
+- 기존 저장소 소스·문서·공통 아키텍처 최신 확인 후 기술 스택 및 작업 브랜치 확정
+- 전문 Dark Theme, 공통 Shell/Sidebar/라우터, 공통 표·필터·이미지 컴포넌트, 독립 웹 실행
+- Equipment/LOT/Product/Inspection/Image/Review/Model/Hub 상태 Mock Fixture 및 데이터 생성
+- Mock와 Real API Adapter 분리. Mock API에서 검색/이동/상태 조회/저장 등 실제 사용자 흐름 동작
+- 향후 `/studio/` 경로/프록시 지원 가능하도록 배포 구성
+- **완료 기준**: 임시 데이터로 독립 웹에서 모든 메뉴·라우팅·기본 동작 시연 가능, Mock 표시 정확
 
-## Phase 1 — Data Explorer
+## Phase 1 — Inspection Explorer: 핵심 DataGrid
 
-- 설비/LOT/ProductID/검사 실행 단위 검색과 결과 목록·상세 뷰
-- 검사 이미지 썸네일/원본 보기, 촬영 위치 및 NG 결과 확인
-- 조회 실패/데이터 없음/미매칭 상태 구분, 권한 확인
-- **완료 기준**: DatasetHub 샘플 데이터에 대해 조회 응답과 원본 이미지 대응이 검증됨
+- LOT→Product 계층형 표, 기간·설비·LOT·ProductID·검사 유형·OK/NG 검색, 정렬·페이징, 필터 유지
+- LOT 집계와 제품별 검사 결과/이미지 수/검토 상태 표시
+- NG Product 클릭 시 해당 제품의 Image Detail 페이지로 이동
+- 누락/부분 매칭/데이터 없음과 정상 빈 결과 구분
+- **완료 기준**: EQ01~EQ09 Mock, NG/OK, 재검사, 복수 LOT 조건 검색 및 제품 이동 검증
 
-## Phase 2 — Dataset Management
+## Phase 2 — Image Viewer / Review
 
-- 검사 결과/조건 기반 학습 후보 필터링, 대상 목록 저장
-- Dataset ID, 버전, 생성일, 포함 이미지/제품 목록, 원본 출처 기록
-- 외부 도구로 전달할 이미지/메타데이터 Export; SAIGE 지원 포맷은 확인 후 구현
-- 원본 파일 변경/삭제 금지, 재현성 확인
-- **완료 기준**: 지정 이미지 세트와 메타데이터를 동일 버전으로 다시 내보낼 수 있음
+- Side/Thermal 이미지 선택, Zoom/Pan, 100% 보기, ROI/NG 오버레이, 사진 간 비교, 재검사 이동
+- 개발자 원본 판정 변경 없이 Review 결과·불량 유형·메모·검토자·이력 별도 기록
+- 브라우저 호환 미지원 TIFF 대용량 이미지 전략(썸네일/타일/변환) 수립
+- **완료 기준**: Mock 이미지에서 확대/비교/검토 및 저장 후 재조회 동작
 
-## Phase 3 — AI Model Registry
+## Phase 3 — AI Model Management (핵심)
 
-- 모델명·ID·버전·학습일·Dataset 버전·성능 지표·아티팩트 경로·상태 관리
-- 버전 비교 및 변경 이력, 등록 정보 유효성 검증
-- 실제 모델 학습/서빙/자동 평가 기능은 개발 범위 아님
-- **완료 기준**: 담당자가 SAIGE 학습 후 모델 정보를 등록하고 사용 이력을 조회 가능
+- Model Registry 목록·상세·등록·버전·모델별 Dataset/평가 결과/파일 경로/운영상태
+- 모델 성능 비교는 동일 평가 기준으로 수행, 변경 이력
+- 실제 학습·모델 배포·추론 엔진 구현 제외
+- **완료 기준**: Mock 모델 등록·버전 관리와 상태 조회 정상
 
-## Phase 4 — SAIGE 실행 연결
+## Phase 4 — Dataset Management
 
-- SAIGE 실행 경로/인자·지원 Import 포맷·라이선스 제약 검증
-- 학습 PC에서만 동작하는 승인된 Custom URI / Local Launcher 등 검토
-- 임의 외부 명령 실행 금지, 명시적 사용자 클릭·허용 목록·오류 피드백
-- **완료 기준**: 학습 PC에서 사용자가 직접 실행하고, 잘못된 실행 요청을 거부
+- 필터/Review 기반 이미지 선별, Dataset 구성·버전, 출처·재현성 기록
+- Export 구현 전 SAIGE Import 형식 확정; 임의 자동 변환 최소화
+- **완료 기준**: 같은 버전에서 동일 파일 목록과 Review Label을 재현 가능
 
-## Phase 5 — Equipment AI Platform 통합
+## Phase 5 — DatasetHub Management (읽기 우선, 제한된 원격 명령)
 
-- Reverse Proxy의 단일 외부 주소·포트에서 `/studio/` 경로 라우팅
-- 메뉴 및 로그인/권한 체계 연계, 하위 경로와 정적 파일/링크/리로드 검증
-- Studio 독립 배포 가능성 유지; 통합 장애가 DatasetHub 수집을 멈추지 않아야 함
-- **완료 기준**: 독립 접근과 상위 포털 메뉴를 통한 접근 모두 정상 동작
+- Hub API/Heartbeat/실제 수집 진행 상태와 설비·PC별 연결·오류·누락·복구 상태 조회
+- DatasetHub가 완전히 종료된 경우 Web에서 연결 불가/마지막 응답 시간 표시
+- 별도 인증·권한 확인 후에만 수동 재수집·실패 재시도 요청 추가. 실행은 기존 DatasetHub Collector가 소유
+- **완료 기준**: 연결 정상/지연/Hub 종료 Mock, 원격 요청 JobId/실행 잠금/오류 검증
+- **주의**: DatasetHub Reliability 구현과 병행 API 계약 협의, 기존 Desktop 운영 기능은 유지
 
-## 공통 검증·개발 원칙
+## Phase 6 — External SAIGE & Upper Platform Integration
 
-- 범용 제품으로 설계하되 첫 검증 대상은 MLCC Trimming
-- 단계별 README 및 API 계약 갱신; CI 빌드·기본 UI 테스트 추가
-- 파일 수집/매칭·학습 엔진을 웹 안에 중복 구현하지 않음
-- 실제 설비 데이터/모델/사내망 비밀은 GitHub에 올리지 않음
+- SAIGE 수동 학습/Export 경로 및 안전한 사용자 주도 실행 연동(실행 방식 검증 후)
+- EquipmentAIPlatform Reverse Proxy `/studio/`, 단일 외부 포트, 라우팅/인증/접근권한 검증
+- **완료 기준**: Studio 독립 접근과 상위 웹 메뉴 접근 모두 가능. 웹 장애가 수집에 영향 없음
 
-## 의존성
+## Phase 7 — RAG / Source Code / LLM (후속)
 
-`DatasetHub 매칭 데이터/API` → Data Explorer → Dataset Management → Model Registry/SAIGE 연결.
-공통 인증/배포 통합은 독립적 PoC로 병행할 수 있음.
+- Agent Orchestrator와 검증된 읽기 전용 검사 조회 Tool 연계
+- 선택 Product/Inspection과 설계 문서·Source Code/Git Commit·Recipe·모델 버전 연결
+- 자연어 검색 결과를 기존 DataGrid/이미지 뷰로 반환. 이미지 유사도 검색은 별도 단계
+- **완료 기준**: 검색 근거·버전 출처가 추적 가능하고 미확정 사실은 표시
+
+## 횡단 검증
+
+- 기존 DatasetHub 수집·감시·복구 기능을 웹에서 재구현하지 않을 것
+- 원본 검사 판정·이미지 변경 금지; Review·Model·Dataset 메타데이터는 별도 이력
+- 다량 데이터는 Server-side filter/page, 썸네일·대용량 이미지 최적화
+- Hub 명령은 권한·감사·중복실행 방지, LLM은 직접 수집/설비 동작 변경 불가
+- 실제 설비 데이터 및 비밀은 공개 Git에 포함하지 않음
+
+## 주요 의존성
+
+Mock Frontend는 독립 착수 가능. 실제 연동은 `DatasetHub Processing/Matching → 조회 API → Inspection Explorer/Image Viewer` 순서.
+Hub Management는 `DatasetHub Reliability/운영 API`에 의존. SAIGE 연동은 Import/실행 계약 검증에 의존.
