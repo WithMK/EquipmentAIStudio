@@ -24,6 +24,8 @@ jobs:
       - run: npx playwright install chromium
       - run: npm run build
       - run: npm run test:e2e
+      - name: Windows double-click launcher smoke test
+        run: powershell -NoProfile -File ../scripts/test-launcher.ps1
       - name: Build platform mount
         run: npm run build
         env:

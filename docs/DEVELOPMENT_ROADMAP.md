@@ -8,12 +8,12 @@
 
 | Phase | 범위 | 상태 |
 |---|---|---|
-| 1 | 저장소 분석, Shell, 테마, 모듈, Router, 서비스/Mock 계약 | 이번 구현 |
-| 2 | Inspection Explorer 검색·LOT/Product 표·정렬·페이징 | 미구현 |
-| 3 | Product Detail·SIDE/THERMAL Viewer·Zoom/Pan | 미구현 |
-| 4 | 원본과 분리된 Image Review·검토 저장/재조회 | 미구현 |
-| 5 | Dataset·AI Model 관리, External AI Tools 정보 | 미구현 |
-| 6 | Mock DatasetHub 관리·통합 검증 | 미구현 |
+| 1 | 저장소 분석, Shell, 테마, 모듈, Router, 서비스/Mock 계약 | 완료 |
+| 2 | Inspection Explorer 검색·LOT/Product 표·정렬·페이징 | 구현 완료 |
+| 3 | Product Detail·SIDE/THERMAL Viewer·Zoom/Pan | 구현 완료 |
+| 4 | 원본과 분리된 Image Review·검토 저장/재조회 | 구현 완료 |
+| 5 | Dataset·AI Model 관리, External AI Tools 정보 | Mock 구현 완료 |
+| 6 | Mock DatasetHub 관리·통합 검증 | Mock 구현 완료 |
 
 실제 API, 인증, SAIGE 실행, LLM, 배포 명령은 이 Mock 프론트엔드 6단계와 별도 합의 대상입니다. 아래 기존 장기안은 기능 방향 참고로 보존합니다.
 

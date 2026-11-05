@@ -1,0 +1,30 @@
+import {test,expect} from '@playwright/test';
+test('NG selection, zoom, pan, fit, type and run switching',async({page})=>{
+ await page.goto('inspections?machine=EQ01&product=P001&lot=20261101');
+ await page.getByRole('link',{name:'P001',exact:true}).click();
+ await expect(page.getByRole('button',{name:'SIDE-1 NG',exact:true})).toHaveAttribute('aria-pressed','true');
+ await expect(page.getByRole('img',{name:'SIDE-1 검사 원본 샘플'})).toBeVisible();
+ await expect(page.getByText('이미지 로딩 중…')).toHaveCount(0);
+ const ratio=page.getByLabel('확대 비율');const before=await ratio.textContent();
+ await page.getByRole('button',{name:'확대',exact:true}).click();expect(await ratio.textContent()).not.toBe(before);
+ await page.getByRole('button',{name:'100%',exact:true}).click();await expect(ratio).toHaveText('100%');
+ const viewport=page.getByRole('region',{name:'검사 이미지 뷰어'});const box=(await viewport.boundingBox())!;
+ const initial=await page.getByTestId('image-transform').getAttribute('style');
+ await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.mouse.move(box.x+box.width/2+70,box.y+box.height/2+30);await page.mouse.up();
+ expect(await page.getByTestId('image-transform').getAttribute('style')).not.toBe(initial);
+ await page.getByRole('button',{name:'맞춤',exact:true}).click();await expect(ratio).toHaveText(before!);
+ await page.getByRole('button',{name:'NG 표시',exact:true}).click();await expect(page.getByLabel('NG 위치')).toHaveCount(0);
+ await page.getByRole('button',{name:'THERMAL',exact:true}).click();await expect(page.getByRole('img',{name:'THERMAL-1 검사 원본 샘플'})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.getByRole('link',{name:'검색 결과로 복귀'}).click();await expect(page.getByLabel('Product ID',{exact:true})).toHaveValue('P001');
+});
+test('missing file and reinspection are explicit and image failures do not crash',async({page})=>{
+ await page.goto('inspections?machine=EQ01&product=P003&lot=20261101');await page.getByRole('link',{name:'P003',exact:true}).click();
+ await page.getByRole('button',{name:/SIDE-1.*누락/}).click();await expect(page.getByText('원본 이미지가 누락되었습니다.')).toBeVisible();
+ await page.getByRole('button',{name:'SIDE-2 OK',exact:true}).click();await expect(page.getByRole('img',{name:'SIDE-2 검사 원본 샘플'})).toBeVisible();
+ await page.goto('inspections?machine=EQ01&product=P002&lot=20261101');await page.getByRole('link',{name:'P002',exact:true}).click();
+ await page.getByRole('button',{name:'SIDE',exact:true}).click();await page.getByLabel('검사 실행').selectOption({index:1});
+ await expect(page.getByRole('button',{name:'SIDE-1 NG',exact:true})).toHaveAttribute('aria-pressed','true');
+ await page.route('**/samples/*',route=>route.abort());await page.reload();
+ await expect(page.getByRole('alert')).toContainText('이미지를 불러오지 못했습니다');
+});
