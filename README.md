@@ -1,15 +1,21 @@
 # Equipment AI Studio
 
-> Frontend Prototype v0.1 · Phase 4 Image Review 구현 · 후속 업무 기능은 미구현
+> Frontend Prototype v0.1 · Phase 1~6 Mock 프론트엔드 구현
 
 **여러 설비의 검사 결과·이미지를 통합 조회·검토·분류하고, AI 데이터셋과 모델을 관리하는 개발자 중심 Web Workspace.**
 
 초기 대상은 MLCC 트리밍 설비(9대, 제어/검사 PC 총 약 27대). 이후 설비 유형을 확장할 수 있도록 설계한다. **실시간 설비 관제(가동률·알람·실시간 상태)**는 별도 관제 시스템 책임으로 중복 구현하지 않는다.
 
 
+## 사용 설명서와 더미 데이터
+
+**[상세 사용 설명서](docs/USER_GUIDE.md)** — 설치, 화면별 조작, 더미 데이터 구성, 10분 시연 순서, 저장 방식, 문제 해결을 정리했습니다.
+
+처음 관리 메뉴를 열면 **더미 Dataset 5개 · 모델 3개 · 외부 도구 1개**를 자동 추가합니다. `[DEMO]` 접두어로 구분하며 기존 사용자 데이터와 검토 이력을 보존합니다. 새로고침·재접속 때 중복 생성하지 않습니다. 샘플 성능과 경로는 예시이며 실제 학습/설치 결과가 아닙니다.
+
 ## 실행 — Windows
 
-Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase4-review`입니다.
+Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase5-6-management`입니다.
 
 ### 더블클릭 실행 (권장)
 
@@ -31,7 +37,7 @@ Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studi
 ### 명령어로 실행
 
 ```powershell
-git clone -b feat/studio-phase4-review https://github.com/WithMK/EquipmentAIStudio.git
+git clone -b feat/studio-phase5-6-management https://github.com/WithMK/EquipmentAIStudio.git
 cd EquipmentAIStudio/web
 npm ci
 npm run dev
@@ -65,7 +71,7 @@ Remove-Item Env:VITE_BASE_PATH
 - 모듈 등록 기반 메뉴·지연 로딩·하위 라우트, Inspection Explorer 기반 화면과 Workspace 환경 화면
 - 서비스 주입, Mock Repository, 공통 HTTP transport, 인증 교체 인터페이스
 - Equipment/LOT/Product/Inspection/Image/Review/Dataset/Model/Hub의 **초안 타입** 및 재현 가능한 설비 9대 fixture
-- 조회·필터·정렬·LOT 단위 페이징과 제품 상세 진입은 구현했습니다. Viewer는 구현했습니다. 이미지별 Review 저장·이력은 구현했습니다. Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
+- 조회·필터·정렬·LOT 단위 페이징과 제품 상세 진입은 구현했습니다. Viewer는 구현했습니다. 이미지별 Review 저장·이력은 구현했습니다. Dataset 생성·확정, Model/외부 도구 등록, Mock Hub 상태 조회를 제공합니다.
 
 [Phase 1 구조와 확장 가이드](docs/FRONTEND_FOUNDATION.md) · [검증 기록](docs/PHASE1_VALIDATION.md)
 
@@ -126,7 +132,7 @@ Mock adapter만 전체 fixture를 메모리에 읽고 화면에는 현재 페이
 
 제품 선택 후 유형별 최신 검사에서 NG 이미지를 먼저 엽니다. SIDE/THERMAL과 검사 실행(재검 포함)을 선택하고 썸네일로 촬영 위치를 바꿀 수 있습니다. 확대/축소, 화면 맞춤, 100%, 드래그 및 방향키 이동을 지원합니다. NG 영역은 원본 픽셀 좌표로 이미지와 함께 변환됩니다. 이미지 전환 시 맞춤으로 초기화합니다. 누락·로딩·실패를 별도 표시합니다.
 
-`web/public/samples/`의 SVG 4개는 확대·NG 위치 확인용 결정적 합성 패턴입니다. 실제 검사 이미지나 실제 온도값이 아닙니다. 촬영 위치별로 일부 패턴을 재사용합니다. 실제 API adapter는 브라우저 호환 썸네일/원본 URL과 크기·NG 좌표를 제공하면 됩니다. TIFF 직접 디코딩/타일 스트리밍, 다중 이미지 동시 비교, 개발자 판정 저장은 미구현입니다.
+`web/public/samples/`의 SVG 4개는 확대·NG 위치 확인용 결정적 합성 패턴입니다. 실제 검사 이미지나 실제 온도값이 아닙니다. 촬영 위치별로 일부 패턴을 재사용합니다. 실제 API adapter는 브라우저 호환 썸네일/원본 URL과 크기·NG 좌표를 제공하면 됩니다. TIFF 직접 디코딩/타일 스트리밍과 다중 이미지 동시 비교는 미구현입니다. 개발자 판정 저장은 Phase 4에 구현했습니다.
 
 화면은 반복 브랜드·예정 메뉴·단계 배지를 줄이고 중성 회색과 판정 색상 중심으로 정리했습니다.
 
@@ -139,3 +145,20 @@ Viewer 오른쪽 개발자 검토에서 OK/NG, 불량 유형(복수), 메모를 
 다른 탭에서 변경한 오래된 검토의 저장은 충돌 오류로 거부합니다. 다시 불러오기 후 검토하세요. 이미지·유형·검사 실행 변경과 화면 이동에는 미저장 확인이 있으며 탭 종료/새로고침에는 브라우저 기본 확인을 요청합니다. 브라우저가 종료 확인을 표시하지 않을 수 있으므로 저장 버튼 완료 메시지를 확인하세요.
 
 `ReviewRepository`를 HTTP adapter로 교체할 수 있습니다. image-review 패널은 공통 slot 계약으로 주입되어 Viewer에서 다른 feature를 직접 import하지 않습니다. 실제 백엔드에서는 인증된 검토자·권한·revision 충돌 검증이 필요합니다.
+
+## Phase 5 — Dataset / Model / External AI Tools
+
+- **Datasets**: 생성 → 설비·LOT/Product·유형·레이블·검토 상태로 검색 → 이미지 선택(페이지 간 유지, 최대 500개) → 이름/버전 저장 → 버전 확정. 누락 이미지는 제외하고 재검사 실행별 이미지도 표시합니다.
+- Dataset은 생성 당시 이미지 ID, 제품/LOT/설비/검사 출처, 원본 판정, 개발자 Review 전체와 최종 레이블을 보존합니다. 이후 Review가 바뀌어도 기존 버전은 바뀌지 않습니다. 미검토 이미지는 원본 판정을 사용합니다. 새 버전은 독립적으로 선택·저장합니다.
+- **AI Models**: 확정 Dataset 선택 → 모델명/버전/학습일/Accuracy/평가 조건/파일 경로/상태 등록. 목록·검색·상세 및 학습 Dataset 이동. 상태는 기록용이며 운영 선택이 실제 배포를 실행하지 않습니다.
+- **External AI Tools**: SAIGE 등 도구명/버전/설치 경로/메모 등록·재조회. 외부 도구의 역할과 EXE 미연결 상태를 표시합니다.
+- 같은 이름/버전 중복은 대소문자·앞뒤 공백을 정규화하여 차단합니다. IndexedDB 트랜잭션으로 동시 등록도 검사합니다. Dataset/모델 버전의 내용 편집·삭제·Export는 제공하지 않으며 변경은 새 버전 등록으로 관리합니다.
+- 신규 저장소는 `equipment-ai-studio-catalog-v1`; 기존 Review DB를 변경하지 않습니다. 브라우저 프로필/origin별 저장이고 백업·실제 인증·서버 공유는 없습니다. 경로는 텍스트 메타데이터이며 파일 접근/업로드는 하지 않습니다.
+
+## Phase 6 — DatasetHub 조회
+
+**DatasetHub** 메뉴에서 9대 설비·27개 PC의 Mock 수집 상태를 확인합니다. 정상/지연/실패 혼합, 장애 복구 후 정상, Hub 연결 불가 시나리오를 선택할 수 있습니다. 설비/PC 검색·상태 필터·PC 상세·오류/재시도/복구 이력을 제공합니다.
+
+샘플 기준은 **2026-11-05 12:02 KST**로 고정됩니다. 30초 자동/수동 새로고침은 같은 샘플의 재조회이며 실시간 설비 통신이 아닙니다. Hub 미연결에서는 PC 상태를 확인 불가로 표시하고 과거 성공 시각을 현재 정상으로 오인하지 않도록 구분합니다. 실제 수집/재수집/설정 변경 명령은 구현하지 않았습니다.
+
+`CatalogRepository` / `HubRepository`와 4개 독립 Feature Module을 추가했습니다. Shell 업무 로직을 변경하지 않았으며 API 도입 시 adapter 교체가 가능합니다. 실제 인증/API, SAIGE 실행, 모델 학습/배포, Dataset Export, TIFF 대용량 처리, LLM 연계는 후속 범위입니다.
