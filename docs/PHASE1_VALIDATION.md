@@ -30,3 +30,9 @@ Remove-Item Env:VITE_BASE_PATH
 ```
 
 실제 설비·API·인증·검사 조회·Viewer·Review 업무 테스트는 해당 Phase에서 수행합니다. 테스트 통과가 운영 서버 프록시/SSO 구성 검증을 의미하지 않습니다. CI 결과는 해당 커밋의 Actions run에서 확인합니다.
+
+## 실행 결과
+
+[Windows CI run 41976124926](https://github.com/WithMK/EquipmentAIStudio/actions/runs/41976124926): **성공**. 코드 커밋 `07409572200c65feb8590fb177adefc33ba14b62`. 단위 테스트 8개, root E2E 4개, `/studio/` E2E 4개 통과. 두 해상도 각각 navigation/refresh/404/overflow를 검증했습니다.
+
+![Phase 1 workspace](images/phase1-workspace.jpg)
