@@ -1,6 +1,6 @@
 # Equipment AI Studio
 
-> Frontend Prototype v0.1 · Phase 1 기반 구현 · 후속 업무 기능은 미구현
+> Frontend Prototype v0.1 · Phase 2 Inspection Explorer 구현 · 후속 업무 기능은 미구현
 
 **여러 설비의 검사 결과·이미지를 통합 조회·검토·분류하고, AI 데이터셋과 모델을 관리하는 개발자 중심 Web Workspace.**
 
@@ -9,10 +9,10 @@
 
 ## 실행 — Windows
 
-Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase1-foundation`입니다.
+Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase2-explorer`입니다.
 
 ```powershell
-git clone -b feat/studio-phase1-foundation https://github.com/WithMK/EquipmentAIStudio.git
+git clone -b feat/studio-phase2-explorer https://github.com/WithMK/EquipmentAIStudio.git
 cd EquipmentAIStudio/web
 npm ci
 npm run dev
@@ -46,7 +46,7 @@ Remove-Item Env:VITE_BASE_PATH
 - 모듈 등록 기반 메뉴·지연 로딩·하위 라우트, Inspection Explorer 기반 화면과 Workspace 환경 화면
 - 서비스 주입, Mock Repository, 공통 HTTP transport, 인증 교체 인터페이스
 - Equipment/LOT/Product/Inspection/Image/Review/Dataset/Model/Hub의 **초안 타입** 및 재현 가능한 설비 9대 fixture
-- 조회·필터·표 정렬·Viewer·Review 저장·Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
+- 조회·필터·정렬·LOT 단위 페이징과 제품 상세 진입은 구현했습니다. Viewer·Review 저장·Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
 
 [Phase 1 구조와 확장 가이드](docs/FRONTEND_FOUNDATION.md) · [검증 기록](docs/PHASE1_VALIDATION.md)
 
@@ -94,3 +94,11 @@ Remove-Item Env:VITE_BASE_PATH
 
 검사 메타데이터/식별 규약, 조회·명령 API, 인증, 저장소 스키마, SAIGE 런처 및 Dataset Export 포맷, 배포 포트·경로. 현재 문서는 **합의된 개발 방향**이며 미확정 기능의 구현 완료를 뜻하지 않는다.
 
+
+## Phase 2 Inspection Explorer
+
+Mock 설비 9대 / LOT 54개 / Product 432개, 2026-11-01~11-06 고정 데이터입니다. 날짜 입력·표시는 KST이며 URL/API 계약은 UTC입니다. LOT/제품 ID는 대소문자 무관 포함 검색, 여러 조건은 AND입니다. 제품 판정은 선택 유형의 최신 실행 중 하나라도 NG면 NG입니다. 과거 재검사 NG는 현재 NG 필터에 포함하지 않습니다. 이미지 수는 필터에 일치하는 최신 실행 기준, 누락 이미지는 별도로 표시합니다.
+
+페이지 크기는 LOT 개수입니다. 필터 후 LOT에 일치하는 제품을 모두 표시해 한 LOT를 두 페이지로 나누지 않습니다. 정렬은 각 LOT 안의 제품에 적용하고 LOT는 첫 제품의 정렬값으로 정렬합니다. 검색·정렬·페이지 조건은 URL에 저장되어 상세 진입 후 복귀·새로고침·뒤로가기에 유지됩니다. 상세 진입 화면은 메타데이터와 원본 검사 이력만 제공하며 Viewer는 Phase 3입니다.
+
+Mock adapter만 전체 fixture를 메모리에 읽고 화면에는 현재 페이지가 전달됩니다. 실제 API에서는 LOT 페이지와 제품 자식 조회를 서버에서 처리해야 하며 대형 LOT의 자식 페이징/가상화는 실데이터 규모에 맞춰 후속 도입합니다. 현재는 별도 Grid 종속성 없이 접근 가능한 HTML table을 사용합니다.

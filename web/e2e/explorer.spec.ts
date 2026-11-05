@@ -1,0 +1,36 @@
+import {test,expect} from '@playwright/test';
+test('filters, hierarchy, paging, sorting and detail return preserve URL',async({page})=>{
+ await page.goto('inspections');
+ await page.getByLabel('설비',{exact:true}).selectOption('EQ01');
+ await page.getByLabel('원본 판정',{exact:true}).selectOption('NG');
+ await page.getByRole('button',{name:'검색',exact:true}).click();
+ await expect(page).toHaveURL(/machine=EQ01/);
+ await expect(page.getByRole('table')).toContainText('P001');
+ await page.getByRole('button',{name:'다음',exact:true}).click();
+ await expect(page).toHaveURL(/page=2/);
+ await page.getByRole('button',{name:'제품 ID 정렬'}).click();
+ await expect(page).toHaveURL(/sort=productId/);
+ const group=page.getByRole('button',{name:/펼치기\/접기/}).first();
+ await group.click();await expect(group).toHaveAttribute('aria-expanded','false');await group.click();
+ const before=page.url();
+ await page.getByRole('link',{name:'P001'}).first().click();
+ await expect(page.getByRole('heading',{name:'Product inspection · 상세 진입'})).toBeVisible();
+ await page.reload();await expect(page.getByText('원본 검사 실행 이력',{exact:true})).toBeVisible();
+ await page.getByRole('link',{name:'검색 결과로 복귀'}).click();
+ await expect(page).toHaveURL(before);
+ await expect(page.getByLabel('설비',{exact:true})).toHaveValue('EQ01');
+ await expect(page.getByLabel('원본 판정',{exact:true})).toHaveValue('NG');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+test('empty result, reset and reversed dates',async({page})=>{
+ await page.goto('inspections');
+ await page.getByLabel('Product ID',{exact:true}).fill('no-such-product');
+ await page.getByRole('button',{name:'검색',exact:true}).click();
+ await expect(page.getByText('검색 조건에 맞는 제품이 없습니다')).toBeVisible();
+ await page.getByRole('button',{name:'검색 초기화'}).click();
+ await expect(page.getByRole('table')).toBeVisible();
+ await page.getByLabel('시작 일시',{exact:true}).fill('2026-11-06T12:00');
+ await page.getByLabel('종료 일시',{exact:true}).fill('2026-11-01T12:00');
+ await page.getByRole('button',{name:'검색',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('시작 일시는');
+});
