@@ -1,10 +1,54 @@
 # Equipment AI Studio
 
-> 설계 v0.2 · 2026-11-05 · 개발 방향 문서 (구현 완료 의미 아님)
+> Frontend Prototype v0.1 · Phase 1 기반 구현 · 후속 업무 기능은 미구현
 
 **여러 설비의 검사 결과·이미지를 통합 조회·검토·분류하고, AI 데이터셋과 모델을 관리하는 개발자 중심 Web Workspace.**
 
 초기 대상은 MLCC 트리밍 설비(9대, 제어/검사 PC 총 약 27대). 이후 설비 유형을 확장할 수 있도록 설계한다. **실시간 설비 관제(가동률·알람·실시간 상태)**는 별도 관제 시스템 책임으로 중복 구현하지 않는다.
+
+
+## 실행 — Windows
+
+Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase1-foundation`입니다.
+
+```powershell
+git clone -b feat/studio-phase1-foundation https://github.com/WithMK/EquipmentAIStudio.git
+cd EquipmentAIStudio/web
+npm ci
+npm run dev
+```
+
+터미널의 Local 주소(기본 `http://localhost:5173/`)를 브라우저에서 엽니다. VS2026의 C# 솔루션 빌드가 아니라 Node.js 웹 프로젝트입니다. 인터넷이 없는 환경은 npm 의존성을 사전에 준비해야 합니다.
+
+```powershell
+npm run check
+npm run build
+npm run preview
+```
+
+`dist/`가 정적 배포 결과입니다. `index.html`을 파일 탐색기로 직접 여는 방식은 지원하지 않습니다. 운영 서버는 앱 경로의 미존재 파일 요청을 해당 `index.html`로 fallback해야 합니다(API 경로 제외).
+
+상위 포털 경로로 빌드하려면:
+
+```powershell
+$env:VITE_BASE_PATH = '/studio/'
+npm run build
+npm run preview
+# preview가 출력한 주소 뒤 /studio/ 로 접속
+Remove-Item Env:VITE_BASE_PATH
+```
+
+환경값은 **빌드 시점** 설정입니다. `.env.example`을 `.env.local`로 복사해도 됩니다. `VITE_API_BASE_URL`은 UI 경로와 별개이며 현재 연결되지 않습니다. `VITE_DATA_MODE=mock`만 지원하고 다른 값은 시작 오류로 표시합니다. 임의로 실제 API에 연결하거나 Mock으로 몰래 대체하지 않습니다. 모든 `VITE_*` 값은 브라우저에 공개되므로 비밀값을 넣지 마세요.
+
+## 현재 구현 범위
+
+- 공통 Dark Theme, 접이식 Sidebar, 작업 헤더·상태바, 오류·로딩·404 처리
+- 모듈 등록 기반 메뉴·지연 로딩·하위 라우트, Inspection Explorer 기반 화면과 Workspace 환경 화면
+- 서비스 주입, Mock Repository, 공통 HTTP transport, 인증 교체 인터페이스
+- Equipment/LOT/Product/Inspection/Image/Review/Dataset/Model/Hub의 **초안 타입** 및 재현 가능한 설비 9대 fixture
+- 조회·필터·표 정렬·Viewer·Review 저장·Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
+
+[Phase 1 구조와 확장 가이드](docs/FRONTEND_FOUNDATION.md) · [검증 기록](docs/PHASE1_VALIDATION.md)
 
 ## 주요 사용자와 업무 흐름
 
@@ -33,7 +77,7 @@
 ## 개발 원칙
 
 - **Frontend First**: 현재 실제 로그/검사 이미지가 없으므로 Mock LOT/Product/Inspection/Image/Model/HubStatus로 UI를 먼저 개발.
-- 기술 스택은 확정 전이며 React + TypeScript를 후보로 검토. 기본 UI는 전문 이미지 분석용 Dark Theme. Mock와 실제 API 연결 계층 분리.
+- Phase 1은 React + TypeScript + Vite를 사용. 기본 UI는 전문 이미지 분석용 Dark Theme. Mock와 실제 API 연결 계층 분리.
 - Mock 사용 중임을 UI에 표시. 원본 검출 결과/개발자 Review 결과 분리, 리뷰 변경 이력 및 추적성 유지.
 - DatasetHub WPF의 설비 등록·네트워크/공유폴더 점검·수집 감시·복구는 **필수**. Studio의 Hub Management는 원격 보조 기능이다.
 - 초기 독립 웹으로 개발하고 향후 상위 포털의 `/studio/` 경로로 연결. Reverse Proxy로 외부 주소·포트를 하나로 제공하되 내부 서비스는 독립 유지.
@@ -48,4 +92,5 @@
 
 ## 미확정
 
-웹 스택, 검사 메타데이터/식별 규약, 조회·명령 API, 인증, 저장소 스키마, SAIGE 런처 및 Dataset Export 포맷, 배포 포트·경로. 현재 문서는 **합의된 개발 방향**이며 미확정 기능의 구현 완료를 뜻하지 않는다.
+검사 메타데이터/식별 규약, 조회·명령 API, 인증, 저장소 스키마, SAIGE 런처 및 Dataset Export 포맷, 배포 포트·경로. 현재 문서는 **합의된 개발 방향**이며 미확정 기능의 구현 완료를 뜻하지 않는다.
+
