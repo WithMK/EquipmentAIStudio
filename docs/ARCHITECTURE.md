@@ -119,7 +119,7 @@ EquipmentAIStudio/
   server/                      # 필요한 API/BFF (후속 검토)
 ```
 
-프론트엔드 스택은 미확정(React+TS 후보). 시각 디자인은 고밀도 전문가형 **Dark Theme 검사 분석 워크스테이션**. 검색/표/이미지/오른쪽 메타데이터 패널의 일관성을 우선한다.
+Phase 1 프론트엔드는 React + TypeScript + Vite, React Router, TanStack Query, Tailwind CSS로 구현했습니다. 공통 버튼은 Radix/CVA 기반 shadcn 방식의 소스 소유 컴포넌트이며 shadcn CLI 전체 스캐폴딩을 설치하지 않았습니다. 표 라이브러리 선택은 Phase 2로 미룹니다. 시각 디자인은 고밀도 전문가형 **Dark Theme 검사 분석 워크스테이션**. 검색/표/이미지/오른쪽 메타데이터 패널의 일관성을 우선한다.
 
 ## 6. 독립 배포와 상위 웹 통합
 
@@ -138,4 +138,10 @@ EquipmentAIStudio/
 
 ## 8. 미결정 및 이행
 
-웹 프레임워크/호스팅, 데이터 계약, DB 및 API 위치, Hub API 인증·접속 구조, SAIGE Import 및 런처, 정밀 이미지 포맷과 타일 서비스, 배포 경로/포트. 본 문서는 설계 방향이지 구현 보증이 아니다.
+운영 호스팅, 데이터 계약, DB 및 API 위치, Hub API 인증·접속 구조, SAIGE Import 및 런처, 정밀 이미지 포맷과 타일 서비스, 배포 경로/포트. 본 문서는 설계 방향이지 구현 보증이 아니다.
+
+
+
+## Phase 1 구현 경계 (2026-11-05)
+
+실제 코드는 `web/src/` 아래 app / features / shared / adapters로 분리됩니다. [확장 가이드](FRONTEND_FOUNDATION.md)가 구체적 의존성과 모듈 추가 절차를 정의합니다. 위 업무 기능 명세 전체의 구현 완료를 의미하지 않습니다.
