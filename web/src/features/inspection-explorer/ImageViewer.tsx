@@ -1,0 +1,22 @@
+import { useEffect, useRef, useState } from 'react';
+import { Minus, Plus, Maximize, Crosshair } from 'lucide-react';
+import type { InspectionImage } from '../../shared/domain/models';
+import { Button } from '../../shared/ui/button';
+import { clampScale,fitScale } from './viewerMath';
+export function ImageViewer({image}:{image:InspectionImage}) {
+ const viewport=useRef<HTMLDivElement>(null);const drag=useRef<{x:number;y:number;offsetX:number;offsetY:number}|null>(null);
+ const [size,setSize]=useState({width:800,height:500});const [scale,setScale]=useState(1);const [offset,setOffset]=useState({x:0,y:0});
+ const [fit,setFit]=useState(true);const [overlay,setOverlay]=useState(true);const [failed,setFailed]=useState(false);const [loaded,setLoaded]=useState(false);
+ const width=image.width||1600,height=image.height||1000;
+ useEffect(()=>{const observer=new ResizeObserver(entries=>{const rect=entries[0].contentRect;setSize({width:rect.width,height:rect.height});});if(viewport.current)observer.observe(viewport.current);return()=>observer.disconnect();},[]);
+ useEffect(()=>{if(fit){setScale(fitScale(size.width,size.height,width,height));setOffset({x:0,y:0});}},[fit,size,width,height]);
+ const zoom=(factor:number)=>{setFit(false);const next=clampScale(scale*factor);setScale(next);setOffset(p=>({x:p.x*next/scale,y:p.y*next/scale}));};
+ const available=image.availability==='available'&&!!image.imageUrl;
+ return <div className="image-viewer"><div className="viewer-toolbar"><span>{image.capturePoint}</span><div><Button variant="outline" size="sm" aria-label="축소" disabled={!available||failed} onClick={()=>zoom(1/1.25)}><Minus size={14}/></Button><output aria-label="확대 비율">{Math.round(scale*100)}%</output><Button variant="outline" size="sm" aria-label="확대" disabled={!available||failed} onClick={()=>zoom(1.25)}><Plus size={14}/></Button><Button variant="outline" size="sm" disabled={!available||failed} onClick={()=>{setFit(true);setOffset({x:0,y:0});setScale(fitScale(size.width,size.height,width,height));}}><Maximize size={14}/>맞춤</Button><Button variant="outline" size="sm" disabled={!available||failed} onClick={()=>{setFit(false);setScale(1);setOffset({x:0,y:0});}}>100%</Button><Button variant="outline" size="sm" aria-pressed={overlay} onClick={()=>setOverlay(x=>!x)}><Crosshair size={14}/>NG 표시</Button></div></div>
+ <div className="image-viewport" ref={viewport} tabIndex={0} role="region" aria-label="검사 이미지 뷰어" onKeyDown={e=>{if(!available||failed)return; if(e.key==='+'||e.key==='='){e.preventDefault();zoom(1.25);}else if(e.key==='-'){e.preventDefault();zoom(1/1.25);}else if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();setFit(false);setOffset(p=>({x:p.x+(e.key==='ArrowLeft'?30:e.key==='ArrowRight'?-30:0),y:p.y+(e.key==='ArrowUp'?30:e.key==='ArrowDown'?-30:0)}));}}}
+ onPointerDown={e=>{if(!available||failed||e.button!==0)return; e.currentTarget.setPointerCapture(e.pointerId);drag.current={x:e.clientX,y:e.clientY,offsetX:offset.x,offsetY:offset.y};setFit(false);}}
+ onPointerMove={e=>{if(drag.current)setOffset({x:drag.current.offsetX+e.clientX-drag.current.x,y:drag.current.offsetY+e.clientY-drag.current.y});}}
+ onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}} onLostPointerCapture={()=>{drag.current=null;}}>
+ {!available?<div className="viewer-message">{image.availability==='missing'?'원본 이미지가 누락되었습니다.':'이미지를 아직 사용할 수 없습니다.'}<small>다른 촬영 위치를 선택하세요.</small></div>:failed?<div className="viewer-message" role="alert">이미지를 불러오지 못했습니다.<small>경로 또는 서버 연결을 확인하세요.</small></div>:<><div className="image-transform" data-testid="image-transform" style={{width,height,transform:`translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px) scale(${scale})`}}><img src={image.imageUrl} alt={`${image.capturePoint} 검사 원본 샘플`} draggable={false} onLoad={()=>setLoaded(true)} onError={()=>setFailed(true)}/>{overlay&&<svg className="defect-overlay" viewBox={`0 0 ${width} ${height}`} aria-label="NG 위치">{image.defectRegions?.map((region,i)=><g key={i}><rect {...{x:region.x,y:region.y,width:region.width,height:region.height}} fill="none" stroke="#ff6262" strokeWidth={2/scale}/><text x={region.x} y={region.y-10/scale} fill="#ff7777" fontSize={12/scale}>{region.label}</text></g>)}</svg>}</div>{!loaded&&<div className="viewer-message" role="status">이미지 로딩 중…</div>}</>}
+ </div><div className="viewer-status"><span>드래그: 이동 · + / −: 확대·축소 · 방향키: 이동</span><span>{width} × {height} px · 합성 테스트 이미지</span></div></div>;
+}

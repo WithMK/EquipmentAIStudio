@@ -1,6 +1,6 @@
 # Equipment AI Studio
 
-> Frontend Prototype v0.1 · Phase 2 Inspection Explorer 구현 · 후속 업무 기능은 미구현
+> Frontend Prototype v0.1 · Phase 3 이미지 Viewer 구현 · 후속 업무 기능은 미구현
 
 **여러 설비의 검사 결과·이미지를 통합 조회·검토·분류하고, AI 데이터셋과 모델을 관리하는 개발자 중심 Web Workspace.**
 
@@ -9,10 +9,10 @@
 
 ## 실행 — Windows
 
-Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase2-explorer`입니다.
+Node.js 24 LTS와 Git이 필요합니다. 현재 개발 브랜치는 `feat/studio-phase3-viewer`입니다.
 
 ```powershell
-git clone -b feat/studio-phase2-explorer https://github.com/WithMK/EquipmentAIStudio.git
+git clone -b feat/studio-phase3-viewer https://github.com/WithMK/EquipmentAIStudio.git
 cd EquipmentAIStudio/web
 npm ci
 npm run dev
@@ -46,7 +46,7 @@ Remove-Item Env:VITE_BASE_PATH
 - 모듈 등록 기반 메뉴·지연 로딩·하위 라우트, Inspection Explorer 기반 화면과 Workspace 환경 화면
 - 서비스 주입, Mock Repository, 공통 HTTP transport, 인증 교체 인터페이스
 - Equipment/LOT/Product/Inspection/Image/Review/Dataset/Model/Hub의 **초안 타입** 및 재현 가능한 설비 9대 fixture
-- 조회·필터·정렬·LOT 단위 페이징과 제품 상세 진입은 구현했습니다. Viewer·Review 저장·Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
+- 조회·필터·정렬·LOT 단위 페이징과 제품 상세 진입은 구현했습니다. Viewer는 구현했습니다. Review 저장·Dataset/Model CRUD·Hub 상태 조회는 **후속 단계**입니다. 예정 메뉴는 링크가 아닙니다.
 
 [Phase 1 구조와 확장 가이드](docs/FRONTEND_FOUNDATION.md) · [검증 기록](docs/PHASE1_VALIDATION.md)
 
@@ -102,3 +102,11 @@ Mock 설비 9대 / LOT 54개 / Product 432개, 2026-11-01~11-06 고정 데이터
 페이지 크기는 LOT 개수입니다. 필터 후 LOT에 일치하는 제품을 모두 표시해 한 LOT를 두 페이지로 나누지 않습니다. 정렬은 각 LOT 안의 제품에 적용하고 LOT는 첫 제품의 정렬값으로 정렬합니다. 검색·정렬·페이지 조건은 URL에 저장되어 상세 진입 후 복귀·새로고침·뒤로가기에 유지됩니다. 상세 진입 화면은 메타데이터와 원본 검사 이력만 제공하며 Viewer는 Phase 3입니다.
 
 Mock adapter만 전체 fixture를 메모리에 읽고 화면에는 현재 페이지가 전달됩니다. 실제 API에서는 LOT 페이지와 제품 자식 조회를 서버에서 처리해야 하며 대형 LOT의 자식 페이징/가상화는 실데이터 규모에 맞춰 후속 도입합니다. 현재는 별도 Grid 종속성 없이 접근 가능한 HTML table을 사용합니다.
+
+## Phase 3 이미지 검토 화면
+
+제품 선택 후 유형별 최신 검사에서 NG 이미지를 먼저 엽니다. SIDE/THERMAL과 검사 실행(재검 포함)을 선택하고 썸네일로 촬영 위치를 바꿀 수 있습니다. 확대/축소, 화면 맞춤, 100%, 드래그 및 방향키 이동을 지원합니다. NG 영역은 원본 픽셀 좌표로 이미지와 함께 변환됩니다. 이미지 전환 시 맞춤으로 초기화합니다. 누락·로딩·실패를 별도 표시합니다.
+
+`web/public/samples/`의 SVG 4개는 확대·NG 위치 확인용 결정적 합성 패턴입니다. 실제 검사 이미지나 실제 온도값이 아닙니다. 촬영 위치별로 일부 패턴을 재사용합니다. 실제 API adapter는 브라우저 호환 썸네일/원본 URL과 크기·NG 좌표를 제공하면 됩니다. TIFF 직접 디코딩/타일 스트리밍, 다중 이미지 동시 비교, 개발자 판정 저장은 미구현입니다.
+
+화면은 반복 브랜드·예정 메뉴·단계 배지를 줄이고 중성 회색과 판정 색상 중심으로 정리했습니다.

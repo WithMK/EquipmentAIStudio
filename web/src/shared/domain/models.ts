@@ -6,7 +6,7 @@ export interface Equipment { id: Id; machineId: string; name: string; equipmentT
 export interface Lot { id: Id; machineId: string; lotId: string; startedAt: string }
 export interface Product { id: Id; lotId: Id; productId: string; machineId: string; parentProductId?: Id; segmentIndex?: number }
 export interface Inspection { id: Id; productId: Id; inspectionRunId: string; type: InspectionType; inspectedAt: string; originalVerdict: Verdict; supersedesInspectionId?: Id }
-export interface InspectionImage { id: Id; inspectionId: Id; capturePoint: string; capturedAt: string; originalVerdict: Verdict; availability: 'available'|'missing'|'pending'; thumbnailUrl?: string; imageUrl?: string; width?: number; height?: number }
+export interface InspectionImage { id: Id; inspectionId: Id; capturePoint: string; capturedAt: string; originalVerdict: Verdict; availability: 'available'|'missing'|'pending'; thumbnailUrl?: string; imageUrl?: string; width?: number; height?: number; defectRegions?: {x:number;y:number;width:number;height:number;label:string}[] }
 export interface InspectionReview { id: Id; imageId: Id; verdict: Verdict; defectTypeIds: string[]; note: string; reviewerId: Id; reviewedAt: string; previousReviewId?: Id }
 export interface Dataset { id: Id; name: string; version: string; status: 'draft'|'frozen'; items: {imageId: Id; reviewId?: Id}[] }
 export interface AIModel { id: Id; name: string; version: string; datasetId: Id; datasetVersion: string; trainedAt?: string; metrics: Record<string,number>; artifactPath: string; status: 'development'|'validation'|'production' }
