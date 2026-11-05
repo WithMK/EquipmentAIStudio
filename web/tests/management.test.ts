@@ -53,3 +53,20 @@ it('hub scenarios reflect variable equipment counts, errors, recovery and offlin
  const offline=await repo.snapshot('offline');expect(offline.state).toBe('offline');expect(offline.pcs.every(p=>p.state==='unknown'&&p.access==='unknown')).toBe(true);
  expect(await repo.snapshot('mixed')).toEqual(mixed);expect((await createHubRepository([]).snapshot('mixed')).pcs).toHaveLength(0);
 });
+it('seeds samples once across tabs while preserving user data and existing review history',async()=>{
+ const {catalog,records,reviews,name}=setup();
+ const user=await catalog.createDataset({name:'User dataset',version:'1',imageIds:[records[0].images[0].id]});
+ const a=createCatalogRepository(records,reviews,name,true),b=createCatalogRepository(records,reviews,name,true);
+ await Promise.all([a.datasets(),b.models(),a.tools()]);
+ const datasets=await a.datasets();expect(datasets).toHaveLength(6);expect(datasets.find(x=>x.id===user.id)).toEqual(user);
+ expect(await b.models()).toHaveLength(3);expect(await b.tools()).toHaveLength(1);expect(await reviews.latest()).toEqual([]);
+ expect((await createCatalogRepository(records,reviews,name,true).datasets())).toEqual(datasets);
+ expect(datasets.filter(x=>x.status==='frozen')).toHaveLength(3);
+ for(const d of datasets)expect(d.items.every(x=>records.some(r=>r.images.some(i=>i.id===x.imageId&&i.availability==='available')))).toBe(true);
+});
+it('sample name/version collisions do not overwrite user datasets or create dangling model links',async()=>{
+ const {catalog,records,reviews,name}=setup();const user=await catalog.createDataset({name:'[DEMO] SIDE 기준 데이터',version:'1.0',imageIds:[records[0].images[0].id]});
+ const seeded=createCatalogRepository(records,reviews,name,true);const sets=await seeded.datasets();
+ expect(sets.find(x=>x.id===user.id)).toEqual(user);expect(sets.some(x=>x.id==='demo-side-v1')).toBe(false);
+ expect((await seeded.models()).some(x=>x.datasetId==='demo-side-v1')).toBe(false);
+});

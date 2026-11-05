@@ -15,7 +15,7 @@ export function createMockServices(): StudioServices {
     dataMode: 'mock',
     auth,
     reviews,
-    catalog:createCatalogRepository(records,reviews),
+    catalog:createCatalogRepository(records,reviews,undefined,true),
     hub:createHubRepository(equipment),
     equipment: { async list(options) { options?.signal?.throwIfAborted(); return structuredClone(equipment); } },
     inspections: createInspectionRepository(records),

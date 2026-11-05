@@ -1,14 +1,15 @@
+import { createCatalogFixtures } from './catalogFixtures';
 import type { ProductRecord, InspectionReview } from '../../shared/domain/models';
 import type { CatalogRepository, ReviewRepository } from '../../shared/services/contracts';
 import type { DatasetVersion, ModelVersion, ExternalTool, ImageCandidate, DatasetItem } from '../../shared/domain/management';
-interface Catalog { datasets:DatasetVersion[]; models:ModelVersion[]; tools:ExternalTool[] }
+interface Catalog { sampleVersion?:number; datasets:DatasetVersion[]; models:ModelVersion[]; tools:ExternalTool[] }
 const empty=():Catalog=>({datasets:[],models:[],tools:[]});
 const uid=()=>Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
 const required=(s:string,label:string,max=200)=>{if(!s.trim()||s.length>max)throw new Error(`${label}을(를) 확인하세요.`);return s.trim();};
 const version=(s:string)=>{if(!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,39}$/.test(s.trim()))throw new Error('버전은 영문·숫자·점·밑줄·하이픈 40자 이내로 입력하세요.');return s.trim();};
 const key=(s:string)=>s.trim().toLowerCase();
 /** Separate database: existing review store/version is untouched. All metadata writes serialize. */
-export function createCatalogRepository(records:ProductRecord[],reviews:ReviewRepository,dbName='equipment-ai-studio-catalog-v1'):CatalogRepository {
+export function createCatalogRepository(records:ProductRecord[],reviews:ReviewRepository,dbName='equipment-ai-studio-catalog-v1',seedSamples=false):CatalogRepository {
  let connection:Promise<IDBDatabase>|undefined;
  const open=()=>connection ||= new Promise((resolve,reject)=>{
   const request=indexedDB.open(dbName,1);
@@ -20,9 +21,17 @@ export function createCatalogRepository(records:ProductRecord[],reviews:ReviewRe
  const transact=async<T>(fn:(catalog:Catalog)=>T,write=false):Promise<T>=>{
   const db=await open();
   return new Promise((resolve,reject)=>{
-   const tx=db.transaction('catalog',write?'readwrite':'readonly'),store=tx.objectStore('catalog'),request=store.get('state');
+   const tx=db.transaction('catalog',write||seedSamples?'readwrite':'readonly'),store=tx.objectStore('catalog'),request=store.get('state');
    let result:T;let error:unknown=new Error('저장소 처리 실패. 브라우저 권한과 저장 공간을 확인하세요.');
-   request.onsuccess=()=>{try{const state:Catalog=request.result||empty();result=fn(state);if(write)store.put(state,'state');}catch(e){error=e;tx.abort();}};
+   request.onsuccess=()=>{try{const state:Catalog=request.result||empty();let seeded=false;
+    if(seedSamples&&!state.sampleVersion){
+     const samples=createCatalogFixtures(records);
+     for(const d of samples.datasets)if(!state.datasets.some(x=>x.id===d.id||key(x.name)===key(d.name)&&key(x.version)===key(d.version)))state.datasets.push(d);
+     for(const m of samples.models)if(state.datasets.some(d=>d.id===m.datasetId&&d.status==='frozen')&&!state.models.some(x=>x.id===m.id||key(x.name)===key(m.name)&&key(x.version)===key(m.version)))state.models.push(m);
+     for(const t of samples.tools)if(!state.tools.some(x=>x.id===t.id||key(x.name)===key(t.name)&&key(x.version)===key(t.version)))state.tools.push(t);
+     state.sampleVersion=1;seeded=true;
+    }
+    result=fn(state);if(write||seeded)store.put(state,'state');}catch(e){error=e;tx.abort();}};
    tx.oncomplete=()=>resolve(structuredClone(result));tx.onabort=()=>reject(error);
   });
  };

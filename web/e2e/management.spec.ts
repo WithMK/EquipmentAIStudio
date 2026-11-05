@@ -25,3 +25,10 @@ test('Hub mixed, recovery and offline scenarios; navigation and deep reload',asy
  await page.getByLabel('시연 시나리오',{exact:true}).selectOption('offline');await expect(page.getByText('연결 불가 (Mock)',{exact:true})).toBeVisible();await expect(page.locator('tbody .hub-state.unknown')).toHaveCount(27);await page.reload();await expect(page.getByRole('heading',{name:'DatasetHub',exact:true})).toBeVisible();
  for(const title of ['Datasets','AI Models','External AI Tools','Workspace','Inspection Explorer']){await page.getByRole('link',{name:title,exact:true}).click();await expect(page.getByRole('heading',{name:title,exact:true})).toBeVisible();}
 });
+test('bundled demo datasets and models are ready on first open and not duplicated on reload',async({page})=>{
+ await page.goto('datasets');await expect(page.getByRole('button',{name:'[DEMO] SIDE 기준 데이터 / 1.0',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'[DEMO] SIDE 기준 데이터 / 2.0',exact:true}).click();await expect(page.getByText('확정 · 모델 연결 가능')).toBeVisible();await expect(page.getByText('검토 스냅샷',{exact:true}).first()).toBeVisible();
+ await page.reload();await expect(page.getByRole('button',{name:'[DEMO] SIDE 기준 데이터 / 2.0',exact:true})).toHaveCount(1);
+ await page.getByRole('link',{name:'AI Models',exact:true}).click();await page.getByRole('button',{name:'[DEMO] Side detector / 2.0',exact:true}).click();await expect(page.getByText('98.1%',{exact:true})).toBeVisible();
+ await page.getByRole('link',{name:'[DEMO] SIDE 기준 데이터 / 2.0',exact:true}).click();await expect(page.getByText('확정 · 모델 연결 가능')).toBeVisible();
+});
