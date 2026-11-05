@@ -27,5 +27,12 @@ export function searchRecords(records:ProductRecord[],q:InspectionQuery):Inspect
  return {items:structuredClone(rows.slice((q.page-1)*q.pageSize,q.page*q.pageSize)),total:rows.length,page:q.page,pageSize:q.pageSize,matchedProducts:rows.reduce((s,x)=>s+x.matchedProducts,0),okProducts:rows.reduce((s,x)=>s+x.ok,0),ngProducts:rows.reduce((s,x)=>s+x.ng,0)};
 }
 export function createInspectionRepository(records:ProductRecord[]):InspectionRepository {
- return {async search(q,options){options?.signal?.throwIfAborted();return searchRecords(records,q);},async getProduct(id,options){options?.signal?.throwIfAborted();return structuredClone(records.find(x=>x.product.id===id)||null);}};
+ return {async search(q,options){options?.signal?.throwIfAborted();return searchRecords(records,q);},async getProduct(id,options){options?.signal?.throwIfAborted();const record=structuredClone(records.find(x=>x.product.id===id)||null);
+   if(record) for(const image of record.images) {
+    const type=record.inspections.find(x=>x.id===image.inspectionId)!.type.toLowerCase();
+    image.width=1600;image.height=1000;
+    if(image.availability==='available') {image.imageUrl=`${import.meta.env.BASE_URL}samples/${type}-${image.originalVerdict.toLowerCase()}.svg`;image.thumbnailUrl=image.imageUrl;}
+    image.defectRegions=image.originalVerdict==='NG'?[{x:820,y:300,width:170,height:320,label:'NG 01'}]:[];
+   }
+   return record;}};
 }

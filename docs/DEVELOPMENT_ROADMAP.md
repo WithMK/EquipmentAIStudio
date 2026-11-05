@@ -10,7 +10,7 @@
 |---|---|---|
 | 1 | 저장소 분석, Shell, 테마, 모듈, Router, 서비스/Mock 계약 | 완료 |
 | 2 | Inspection Explorer 검색·LOT/Product 표·정렬·페이징 | 구현 완료 |
-| 3 | Product Detail·SIDE/THERMAL Viewer·Zoom/Pan | 미구현 |
+| 3 | Product Detail·SIDE/THERMAL Viewer·Zoom/Pan | 구현 완료 |
 | 4 | 원본과 분리된 Image Review·검토 저장/재조회 | 미구현 |
 | 5 | Dataset·AI Model 관리, External AI Tools 정보 | 미구현 |
 | 6 | Mock DatasetHub 관리·통합 검증 | 미구현 |

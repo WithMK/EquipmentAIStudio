@@ -14,7 +14,7 @@ test('filters, hierarchy, paging, sorting and detail return preserve URL',async(
  await group.click();await expect(group).toHaveAttribute('aria-expanded','false');await group.click();
  const before=page.url();
  await page.getByRole('link',{name:'P001'}).first().click();
- await expect(page.getByRole('heading',{name:'Product inspection · 상세 진입'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/제품 검사/})).toBeVisible();
  await page.reload();await expect(page.getByText('원본 검사 실행 이력',{exact:true})).toBeVisible();
  await page.getByRole('link',{name:'검색 결과로 복귀'}).click();
  await expect(page).toHaveURL(before);
