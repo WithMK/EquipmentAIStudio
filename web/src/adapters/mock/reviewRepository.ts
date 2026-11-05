@@ -32,6 +32,15 @@ export function createReviewRepository(auth:AuthProvider,canReview:(imageId:stri
   });
  };
  return {
+  async latest(){
+   const db=await open();
+   return new Promise((resolve,reject)=>{
+    const tx=db.transaction('reviews','readonly');const request=tx.objectStore('reviews').getAll();
+    let result:InspectionReview[]=[];
+    request.onsuccess=()=>{result=request.result.flatMap((row:{history:InspectionReview[]})=>row.history.slice(0,1));};
+    tx.oncomplete=()=>resolve(structuredClone(result));tx.onabort=()=>reject(new Error('검토 목록 조회 실패'));
+   });
+  },
   history:id=>transaction(id),
   async defectTypes(){return structuredClone(defects);},
   async save(draft){
