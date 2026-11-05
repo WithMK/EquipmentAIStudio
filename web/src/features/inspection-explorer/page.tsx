@@ -21,11 +21,11 @@ export default function InspectionExplorer(){
  return <div className="explorer"><form className="filter-panel" onSubmit={e=>{e.preventDefault();apply();}}>
  <div className="filter-heading"><strong><Search size={15}/>Inspection search</strong><span>Mock · 2026-11-01 ~ 11-06 · 시간 KST (UTC+09:00)</span></div>
  <div className="filters"><label>시작 일시<input aria-label="시작 일시" type="datetime-local" value={inputTime(draft.from)} onChange={e=>change({from:utcTime(e.target.value)})}/></label><label>종료 일시<input aria-label="종료 일시" type="datetime-local" value={inputTime(draft.to)} onChange={e=>change({to:utcTime(e.target.value)})}/></label>
- <label>설비<select value={draft.machineId||''} onChange={e=>change({machineId:e.target.value||undefined})}><option value="">전체 설비</option>{equipment.data?.map(x=><option key={x.id} value={x.machineId}>{x.machineId} · {x.name}</option>)}</select></label>
- <label>LOT ID<input value={draft.lotId||''} placeholder="LOT ID 포함 검색" onChange={e=>change({lotId:e.target.value.trim()||undefined})}/></label>
- <label>Product ID<input value={draft.productId||''} placeholder="Product ID 포함 검색" onChange={e=>change({productId:e.target.value.trim()||undefined})}/></label>
- <label>검사 유형<select value={draft.type||''} onChange={e=>change({type:e.target.value||undefined})}><option value="">전체 유형</option><option>SIDE</option><option>THERMAL</option></select></label>
- <label>원본 판정<select value={draft.verdict||''} onChange={e=>change({verdict:(e.target.value||undefined) as InspectionQuery['verdict']})}><option value="">전체 판정</option><option>OK</option><option>NG</option></select></label>
+ <label>설비<select aria-label="설비" value={draft.machineId||''} onChange={e=>change({machineId:e.target.value||undefined})}><option value="">전체 설비</option>{equipment.data?.map(x=><option key={x.id} value={x.machineId}>{x.machineId} · {x.name}</option>)}</select></label>
+ <label>LOT ID<input aria-label="LOT ID" value={draft.lotId||''} placeholder="LOT ID 포함 검색" onChange={e=>change({lotId:e.target.value.trim()||undefined})}/></label>
+ <label>Product ID<input aria-label="Product ID" value={draft.productId||''} placeholder="Product ID 포함 검색" onChange={e=>change({productId:e.target.value.trim()||undefined})}/></label>
+ <label>검사 유형<select aria-label="검사 유형" value={draft.type||''} onChange={e=>change({type:e.target.value||undefined})}><option value="">전체 유형</option><option>SIDE</option><option>THERMAL</option></select></label>
+ <label>원본 판정<select aria-label="원본 판정" value={draft.verdict||''} onChange={e=>change({verdict:(e.target.value||undefined) as InspectionQuery['verdict']})}><option value="">전체 판정</option><option>OK</option><option>NG</option></select></label>
  <div className="filter-actions"><Button type="submit"><Search size={14}/>검색</Button><Button type="button" variant="outline" aria-label="검색 초기화" onClick={()=>{setParams(new URLSearchParams());setDraft(readQuery(new URLSearchParams()));setError('');}}><RotateCcw size={14}/></Button></div></div>
  {error&&<p className="filter-error" role="alert">{error}</p>}{equipment.isError&&<p role="alert">설비 목록 로딩 실패 <button type="button" onClick={()=>equipment.refetch()}>다시 시도</button></p>}
  </form>
