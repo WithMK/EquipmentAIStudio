@@ -33,7 +33,7 @@ describe('extension contracts',()=>{
  });
  it('supports cancellation and empty pages without fabricating results',async()=>{
   const service=createMockServices();
-  expect(await service.inspections.search({page:1,pageSize:25})).toEqual({items:[],total:0,page:1,pageSize:25});
+  expect(await service.inspections.search({page:1,pageSize:25,productId:'missing'})).toMatchObject({items:[],total:0,page:1,pageSize:25});
   await expect(service.inspections.search({page:0,pageSize:25})).rejects.toThrow();
   await expect(service.equipment.list({signal:AbortSignal.abort()})).rejects.toThrow();
  });

@@ -57,3 +57,7 @@ Vite `base`와 BrowserRouter `basename`은 같은 설정을 사용합니다. `/s
 ## 이번 단계 제외
 
 검사 표 라이브러리(TanStack Table/AG Grid), 이미지 Viewer, Review 저장소, Dataset/Model CRUD, Hub 실상태, 실제 API/SSO, SAIGE 실행, LLM, 동적 DLL/JS 플러그인, 수집/매칭 로직은 구현하지 않습니다.
+
+## Phase 2 변경
+
+InspectionRepository.search는 `InspectionPage`(LOT 그룹·전체 일치 제품 수·판정 집계)를 반환합니다. `getProduct`는 상세 진입용 고유 제품 키로 조회합니다. URL query는 feature의 `query.ts`, fixture 및 필터 실행은 mock adapter에 있습니다. 업무 상세/재검사/누락 샘플은 `inspectionFixtures.ts`가 생성합니다. 기존 문서의 빈 검색 및 검색 UI 미제공 설명은 Phase 1 기록이며 현재는 검색이 동작합니다.
