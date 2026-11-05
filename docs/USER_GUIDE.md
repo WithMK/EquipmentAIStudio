@@ -203,3 +203,9 @@ npm run test:e2e
 ```
 
 테스트 실행에는 Playwright Chromium 설치가 필요합니다. Windows CI는 두 해상도(1920×1080, 1440×900), 루트와 `/studio/` 경로, 배치 실행을 함께 검증합니다.
+
+## 13. 화면 예시
+
+기존 사용자가 만든 Dataset은 유지되고 `[DEMO]` 버전들이 별도로 추가됩니다. 아래 화면의 6개는 사용자 Dataset 1개와 더미 5개를 함께 표시한 예입니다.
+
+![더미 Dataset 목록과 검토 스냅샷](images/demo-datasets.jpg)
