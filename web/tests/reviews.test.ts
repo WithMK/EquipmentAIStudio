@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import {it,expect} from 'vitest';
+import {it,expect,vi} from 'vitest';
 import {createReviewRepository} from '../src/adapters/mock/reviewRepository';
 const auth={getIdentity:async()=>({id:'tester',displayName:'Test',mode:'demo' as const}),getAccessToken:async()=>null};
 const draft={imageId:'image1',verdict:'NG' as const,defectTypeIds:['crack'],note:'test',expectedReviewId:null};
@@ -27,4 +27,13 @@ it('rejects invalid data, missing images and unknown reviewers',async()=>{
  await expect(createReviewRepository(auth,()=>false).save(draft)).rejects.toThrow('누락');
  await expect(createReviewRepository({...auth,getIdentity:async()=>null},()=>true).save(draft)).rejects.toThrow('검토자');
  expect(await repo.history('image1')).toEqual([]);
+});
+
+it('saves in HTTP development contexts without crypto.randomUUID',async()=>{
+ const name=crypto.randomUUID();
+ vi.stubGlobal('crypto',{getRandomValues:crypto.getRandomValues.bind(crypto)});
+ try {
+  const result=await createReviewRepository(auth,()=>true,name).save(draft);
+  expect(result[0].id).toMatch(/^[0-9a-f]{32}$/);
+ } finally {vi.unstubAllGlobals();}
 });

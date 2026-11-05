@@ -23,7 +23,7 @@ export function createReviewRepository(auth:AuthProvider,canReview:(imageId:stri
     const history:InspectionReview[]=read.result?.history||[];
     if(draft){
      if((history[0]?.id||null)!==draft.expectedReviewId){reason='다른 탭에서 검토가 변경되었습니다. 다시 불러온 후 저장하세요.';tx.abort();return;}
-     const entry:InspectionReview={id:crypto.randomUUID(),imageId,verdict:draft.verdict,defectTypeIds:[...new Set(draft.defectTypeIds)],note:draft.note.trim(),reviewerId:identity!.id,reviewedAt:new Date().toISOString(),...(history[0]?{previousReviewId:history[0].id}:{})};
+     const entry:InspectionReview={id:Array.from(crypto.getRandomValues(new Uint8Array(16)),byte=>byte.toString(16).padStart(2,'0')).join(''),imageId,verdict:draft.verdict,defectTypeIds:[...new Set(draft.defectTypeIds)],note:draft.note.trim(),reviewerId:identity!.id,reviewedAt:new Date().toISOString(),...(history[0]?{previousReviewId:history[0].id}:{})};
      output=[entry,...history];store.put({imageId,history:output});
     }else output=history;
    };
